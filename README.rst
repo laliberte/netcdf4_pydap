@@ -27,6 +27,9 @@ ESGF
 
 #. Connect to OPeNDAP links as follows::
 
+    import matplotlib.pyplot as plt
+    import numpy as np
+
     import netcdf4_pydap 
     import netcdf4_pydap.esgf as esgf
     openid = YOUROPENID
@@ -36,11 +39,12 @@ ESGF
                   'password' : password,
                   'authentication_url' : esgf.authentication_url(openid)}
 
-    url=[u'http://cordexesg.dmi.dk/thredds/dodsC/cordex_general/cordex/output/EUR-11/DMI/ICHEC-EC-EARTH/historical/r3i1p1/DMI-HIRHAM5/v1/day/pr/v20131119/pr_EUR-11_ICHEC-EC-EARTH_historical_r3i1p1_DMI-HIRHAM5_v1_day_19960101-20001231.nc', u'OPENDAP']
+    url = ('http://cordexesg.dmi.dk/thredds/dodsC/cordex_general/cordex/' 
+           'output/EUR-11/DMI/ICHEC-EC-EARTH/historical/r3i1p1/DMI-HIRHAM5/'
+           'v1/day/pr/v20131119/'
+           'pr_EUR-11_ICHEC-EC-EARTH_historical_r3i1p1_DMI-HIRHAM5_v1_day_19960101-20001231.nc')
 
-    import matplotlib.pyplot as plt
-    import numpy as np
-    with netcdf4_pydap.Dataset(url[0],**credentials) as dataset:
+    with netcdf4_pydap.Dataset(url,**credentials) as dataset:
         data = dataset.variables['pr'][0,:,:]
         plt.contourf(np.squeeze(data))
         plt.show()
@@ -62,14 +66,16 @@ There are a few steps required to connect to NASA Earthdata:
    Follow http://disc.sci.gsfc.nasa.gov/registration/authorizing-desidsc-data-access-in-earthdata_login
 #. Load OPeNDAP data::
 
+    import matplotlib.pyplot as plt
+    import numpy as np
     import netcdf4_pydap
+
     credentials={'username': YOURUSERNAME,
                  'password': YOURPASSWORD,
                  'authentication_url':'https://urs.earthdata.nasa.gov/'}
-    url = 'http://goldsmr3.gesdisc.eosdis.nasa.gov:80/opendap/MERRA_MONTHLY/MAIMCPASM.5.2.0/1979/MERRA100.prod.assim.instM_3d_asm_Cp.197901.hdf'
+    url = ('http://goldsmr3.gesdisc.eosdis.nasa.gov:80/opendap/'
+           'MERRA_MONTHLY/MAIMCPASM.5.2.0/1979/MERRA100.prod.assim.instM_3d_asm_Cp.197901.hdf')
 
-    import matplotlib.pyplot as plt
-    import numpy as np
     with netcdf4_pydap.Dataset(url,**credentials) as dataset:
         data = dataset.variables['SLP'][0,:,:]
         plt.contourf(np.squeeze(data))
