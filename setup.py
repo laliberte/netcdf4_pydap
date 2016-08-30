@@ -36,7 +36,7 @@ setup(
         install_requires = [
                             'requests>=1.1.0',
                             'requests_cache',
-                            'netcdf4',
+                            'netCDF4',
                             'pydap',
                             'mechanize'],
         zip_safe=False,
