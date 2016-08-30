@@ -34,7 +34,7 @@ ESGF
 
     credentials={
                   'password' : password,
-                  'authentication_url' : lambda x: esgf.authentication_url(x,openid)}
+                  'authentication_url' : esgf.authentication_url(openid)}
 
     url=[u'http://cordexesg.dmi.dk/thredds/dodsC/cordex_general/cordex/output/EUR-11/DMI/ICHEC-EC-EARTH/historical/r3i1p1/DMI-HIRHAM5/v1/day/pr/v20131119/pr_EUR-11_ICHEC-EC-EARTH_historical_r3i1p1_DMI-HIRHAM5_v1_day_19960101-20001231.nc', u'OPENDAP']
 
@@ -50,7 +50,7 @@ ESGF
     credentials={
                   'username' : YOURCEDAUSERNAME,
                   'password' : password,
-                  'authentication_url' : lambda x: esgf.authentication_url(x,openid)}
+                  'authentication_url' : esgf.authentication_url(openid)}
 
 
 NASA Earthdata
