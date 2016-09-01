@@ -85,4 +85,6 @@ There are a few steps required to connect to NASA Earthdata:
 Version History
 ---------------
 
+0.1.1:  Added special Dataset class to mimic wget.
+
 0.1 :   Initial commit.
