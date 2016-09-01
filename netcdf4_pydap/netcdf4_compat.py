@@ -25,6 +25,7 @@ import numpy as np
 from collections import OrderedDict
 
 import netCDF4.utils as utils
+from pydap.exceptions import ServerError
 
 #Internal:
 from . import requests_http

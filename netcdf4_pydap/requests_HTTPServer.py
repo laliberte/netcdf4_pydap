@@ -21,7 +21,7 @@ class Dataset:
                  cache=None,
                  expire_after=datetime.timedelta(hours=1),
                  session=None,
-                 authorization_url=None,
+                 authentication_url=None,
                  username=None,
                  password=None,
                  use_certificates=False):
@@ -30,7 +30,7 @@ class Dataset:
         self.cache=cache
         self.expire_after=expire_after
         self.passed_session=session
-        self.authorization_url=authorization_url
+        self.authentication_url=authentication_url
         self.username=username
         self.password=password
         self.use_certificates=use_certificates
@@ -91,7 +91,7 @@ class Dataset:
                 self.session.cookies.update(get_cookies.cookieJar(self._url,
                                                                   self.username,
                                                                   self.password,
-                                                                  authorization_url=self.authorization_url))
+                                                                  authentication_url=self.authentication_url))
                 #Retry grabbing the file:
                 self.response = self.session.get(self._url, 
                                                  headers=headers,
