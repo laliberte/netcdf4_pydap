@@ -6,8 +6,6 @@ def authentication_url(openid):
     Create ESGF authentication url.
     This function might be sensitive to a future evolution of the ESGF security.
     '''
-    if openid==None or openid=='':
-        warnings.warn('openid was not set. this was likely unintentional but will result is much fewer datasets.')
     def generate_url(dest_url):
         dest_node=get_node(dest_url)
 
