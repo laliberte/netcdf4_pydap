@@ -91,5 +91,11 @@ def mechanize_login(br, url, username, password):
                             'If you are unable to login, you must either wait or use authentication from another service.'.format(url))
         else:
             pass
-    r=br.submit()
+
+    try:
+        br.find_control("remember").items[0].selected = True
+    except mechanize._form.ControlNotFoundError:
+        pass
+
+    r = br.submit()
     return br
