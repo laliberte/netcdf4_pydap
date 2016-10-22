@@ -79,7 +79,9 @@ class Dataset:
                             timeout=self.timeout,
                             stream=True)
                 retry=False
-            except (requests.exceptions.HTTPError, requests.exceptions.SSLError):
+            except (requests.exceptions.HTTPError,
+                    requests.exceptions.SSLError,
+                    requests.exceptions.ConnectTimeout):
                 retry=True
             else:
                 if self.response.status_code==401:

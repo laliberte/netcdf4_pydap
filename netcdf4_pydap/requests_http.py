@@ -85,7 +85,9 @@ class Pydap_Dataset:
                 #Assign dataset:
                 self._assign_dataset()
                 retry = False
-            except (requests.exceptions.HTTPError, requests.exceptions.SSLError):
+            except (requests.exceptions.HTTPError,
+                    requests.exceptions.SSLError,
+                    requests.exceptions.ConnectTimeout):
                 #If error, try to get new cookies and then assign dataset:
                 retry = True
 
