@@ -9,6 +9,9 @@ import pytest
 import numpy as np
 import time
 
+@pytest.mark.xfail(os.getcwd() == '/home/travis/build/laliberte/netcdf4_pydap',
+                   reason=('urs.earthdata.nasa.gov does not seem to accept'
+                           'connections from Travis-CI'))
 def test_urs_earthdata_nasa_gov():
     """
     Test the urs.earthdata.nasa.gov portal.
