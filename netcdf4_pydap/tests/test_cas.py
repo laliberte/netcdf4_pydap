@@ -7,6 +7,7 @@ import requests
 import netcdf4_pydap
 import pytest
 import numpy as np
+import time
 
 def test_urs_earthdata_nasa_gov():
     """
@@ -21,8 +22,13 @@ def test_urs_earthdata_nasa_gov():
            'MERRA100.prod.assim.instM_3d_asm_Cp.197901.hdf')
 
     session = requests.Session()
-    with netcdf4_pydap.Dataset(url, session=session, **cred) as dataset:
-        data = dataset.variables['SLP'][0, :5, :5]
+    try:
+        with netcdf4_pydap.Dataset(url, session=session, **cred) as dataset:
+            data = dataset.variables['SLP'][0, :5, :5]
+    except requests.exceptions.HTTPError:
+        time.sleep(60)
+        with netcdf4_pydap.Dataset(url, session=session, **cred) as dataset:
+            data = dataset.variables['SLP'][0, :5, :5]
     expected_data = [[[99066.15625, 99066.15625, 99066.15625, 99066.15625, 99066.15625],
                       [98868.15625, 98870.15625, 98872.15625, 98874.15625, 98874.15625],
                       [98798.15625, 98810.15625, 98820.15625, 98832.15625, 98844.15625],
