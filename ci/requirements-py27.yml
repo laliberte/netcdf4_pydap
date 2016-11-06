@@ -4,9 +4,10 @@ channels:
 dependencies:
   - python=2.7
   - pytest
-  - numpy==1.9.3
+  - numpy
   - netcdf4
   - mechanize
+  - pydap
   - requests
   - pip:
       - requests_cache
