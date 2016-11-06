@@ -8,6 +8,5 @@ dependencies:
   - netcdf4
   - mechanize
   - requests
-  - requests_cache
-  - sqlite3
-  - pydap
+  - pip:
+      - requests_cache
