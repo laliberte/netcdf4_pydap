@@ -12,7 +12,7 @@ import requests_cache
 import datetime
 
 #Internal:
-from . import requests_sessions, get_cookies
+from . import sessions, get_cookies
 
 class Dataset:
     def __init__(self,url,
