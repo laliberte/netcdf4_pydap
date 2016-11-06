@@ -6,7 +6,7 @@ This code aims to provide:
 A (partial) compatibility layer with netcdf4-python. In order to do so code was directly
 borrowed from netcdf4-python package.
 
-Frederic Laliberte,2016
+Frederic Laliberte, 2016
 
 with special thanks to
 Jeff Whitaker and co-contributors (netcdf4-python)
@@ -34,9 +34,10 @@ python3=False
 default_encoding = 'utf-8'
 
 class Dataset:
-    def __init__(self,url,cache=None,expire_after=datetime.timedelta(hours=1),timeout=120,
-                          session=None,username=None,password=None,
-                          authentication_url='ESGF', use_certificates=False):
+    def __init__(self, url, cache=None,
+                 expire_after=datetime.timedelta(hours=1), timeout=120,
+                 session=None, username=None, password=None,
+                 authentication_url='ESGF', use_certificates=False):
         self._url = url
         self._pydap_instance = http.Pydap_Dataset(self._url, cache=cache, expire_after=expire_after,
                                                   timeout=timeout, session=session, 
@@ -62,7 +63,7 @@ class Dataset:
     def __enter__(self):
         return self
 
-    def __exit__(self,atype,value,traceback):
+    def __exit__(self, atype, value, traceback):
         self.close()
         return
 
@@ -71,7 +72,7 @@ class Dataset:
         if elem in self.variables.keys():
             return self.variables[elem]
         else:
-            raise IndexError('%s not found in %s' % (lastname,group.path))
+            raise IndexError('%s not found in %s' % (lastname, group.path))
 
     def filepath(self):
         return self._url
@@ -90,17 +91,17 @@ class Dataset:
         varnames = tuple(\
         [utils._tostr(self.variables[varname].dtype)+' \033[4m'+utils._tostr(varname)+'\033[0m'+
         (((utils._tostr(self.variables[varname].dimensions)
-        .replace("u'",""))\
-        .replace("'",""))\
-        .replace(", ",","))\
-        .replace(",)",")") for varname in self.variables.keys()])
+        .replace("u'", ""))\
+        .replace("'", ""))\
+        .replace(", ", ","))\
+        .replace(",)", ")") for varname in self.variables.keys()])
         grpnames = tuple([utils._tostr(grpname) for grpname in self.groups.keys()])
         if self.path == '/':
             ncdump.append('root group (%s data model, file format %s):\n' %
                     (self.data_model, self.disk_format))
         else:
             ncdump.append('group %s:\n' % self.path)
-        attrs = ['    %s: %s\n' % (name,self.getncattr(name)) for name in\
+        attrs = ['    %s: %s\n' % (name, self.getncattr(name)) for name in\
                 self.ncattrs()]
         ncdump = ncdump + attrs
         ncdump.append('    dimensions(sizes): %s\n' % ', '.join(dimnames))
@@ -122,10 +123,10 @@ class Dataset:
         except KeyError as e:
             return []
 
-    def getncattr(self,attr):
+    def getncattr(self, attr):
         return self._pydap_instance._dataset.attributes['NC_GLOBAL'][attr]
 
-    def __getattr__(self,name):
+    def __getattr__(self, name):
         #from netcdf4-python
         # if name in _private_atts, it is stored at the python
         # level and not in the netCDF file.
@@ -136,25 +137,25 @@ class Dataset:
                 values = []
                 for name in names:
                     values.append(self._pydap_instance._dataset.attributes['NC_GLOBAL'][attr])
-                return OrderedDict(zip(names,values))
+                return OrderedDict(zip(names, values))
             else:
                 raise AttributeError
         else:
             return self.getncattr(name)
 
-    def set_auto_maskandscale(self,flag):
+    def set_auto_maskandscale(self, flag):
         raise NotImplementedError('set_auto_maskandscale is not implemented for pydap')
         return
 
-    def set_auto_mask(self,flag):
+    def set_auto_mask(self, flag):
         raise NotImplementedError('set_auto_mask is not implemented for pydap')
         return
 
-    def set_auto_scale(self,flag):
+    def set_auto_scale(self, flag):
         raise NotImplementedError('set_auto_scale is not implemented for pydap')
         return
 
-    def get_variables_by_attributes(self,**kwargs):
+    def get_variables_by_attributes(self, **kwargs):
         #From netcdf4-python
         vs = []
 
@@ -185,26 +186,26 @@ class Dataset:
         else:
             unlimited_dims = []
         var_list = dataset.keys()
-        var_id = np.argmax(map(len,[dataset[varname].dimensions for varname in var_list]))
+        var_id = np.argmax(map(len, [dataset[varname].dimensions for varname in var_list]))
         base_dimensions_list = dataset[var_list[var_id]].dimensions
         base_dimensions_lengths = dataset[var_list[var_id]].shape
         
         for varname in var_list:
             if not set(base_dimensions_list).issuperset(dataset[varname].dimensions):
-                for dim_id,dim in enumerate(dataset[varname].dimensions):
+                for dim_id, dim in enumerate(dataset[varname].dimensions):
                     if not dim in base_dimensions_list:
                         base_dimensions_list += (dim,)
                         base_dimensions_lengths += (dataset[varname].shape[dim_id],)
         dimensions_dict = OrderedDict()
-        for dim,dim_length in zip( base_dimensions_list,base_dimensions_lengths):
-            dimensions_dict[dim] = Dimension(dataset,dim,size=dim_length,isunlimited=(dim in unlimited_dims))
+        for dim, dim_length in zip( base_dimensions_list, base_dimensions_lengths):
+            dimensions_dict[dim] = Dimension(dataset, dim, size=dim_length, isunlimited=(dim in unlimited_dims))
         return  dimensions_dict
 
     def _get_vars(self, dataset):
-        return {var:Variable(dataset[var],var,self) for var in dataset.keys()}
+        return {var:Variable(dataset[var], var, self) for var in dataset.keys()}
 
 class Variable:
-    def __init__(self,var,name,grp):
+    def __init__(self, var, name, grp):
         self._grp = grp
         self._var = var
         self.dimensions = self._getdims()
@@ -233,13 +234,13 @@ class Variable:
     def ncattrs(self):
         return self._var.attributes.keys()
 
-    def getncattr(self,attr):
+    def getncattr(self, attr):
         return self._var.attributes[attr]
 
     def get_var_chunk_cache(self):
         raise NotImpletedError('get_var_chunk_cache is not implemented for pydap')
 
-    def __getattr__(self,name):
+    def __getattr__(self, name):
         #from netcdf4-python
         # if name in _private_atts, it is stored at the python
         # level and not in the netCDF file.
@@ -250,7 +251,7 @@ class Variable:
                 values = []
                 for name in names:
                     values.append(self._var.attributes[attr])
-                return OrderedDict(zip(names,values))
+                return OrderedDict(zip(names, values))
             else:
                 raise AttributeError
         else:
@@ -271,12 +272,12 @@ class Variable:
         else:
             return unicode(self).encode(default_encoding)
 
-    def __getitem__(self,getitem_tuple):
+    def __getitem__(self, getitem_tuple):
         try:
             return self._var.array.__getitem__(getitem_tuple)
         except (AttributeError, ServerError,requests.exceptions.HTTPError) as e:
             if ( 
-                 isinstance(getitem_tuple,slice) and
+                 isinstance(getitem_tuple, slice) and
                  getitem_tuple == _PhonyVariable()[:]):
                 #A single dimension ellipsis was requested. Use netCDF4 convention:
                 return self[...]
@@ -289,13 +290,13 @@ class Variable:
         else:
             return self.shape[0]
 
-    def set_auto_maskandscale(self,maskandscale):
+    def set_auto_maskandscale(self, maskandscale):
         raise NotImplementedError('set_auto_maskandscale is not implemented for pydap')
 
-    def set_auto_scale(self,scale):
+    def set_auto_scale(self, scale):
         raise NotImplementedError('set_auto_scale is not implemented for pydap')
 
-    def set_auto_mask(self,mask):
+    def set_auto_mask(self, mask):
         raise NotImplementedError('set_auto_mask is not implemented for pydap')
 
     def __unicode__(self):
@@ -304,7 +305,7 @@ class Variable:
             return 'Variable object no longer valid'
         ncdump_var = ['%r\n' % type(self)]
         dimnames = tuple([utils._tostr(dimname) for dimname in self.dimensions])
-        attrs = ['    %s: %s\n' % (name,self.getncattr(name)) for name in\
+        attrs = ['    %s: %s\n' % (name, self.getncattr(name)) for name in\
                 self.ncattrs()]
         ncdump_var.append('%s %s(%s)\n' %\
         (self.dtype, self.name, ', '.join(dimnames)))
@@ -352,9 +353,9 @@ class Dimension:
         if not dir(self._grp):
             return 'Dimension object no longer valid'
         if self.isunlimited():
-            return repr(type(self))+" (unlimited): name = '%s', size = %s\n" % (self._name,len(self))
+            return repr(type(self))+" (unlimited): name = '%s', size = %s\n" % (self._name, len(self))
         else:
-            return repr(type(self))+": name = '%s', size = %s\n" % (self._name,len(self))
+            return repr(type(self))+": name = '%s', size = %s\n" % (self._name, len(self))
 
 
 class _PhonyVariable:
