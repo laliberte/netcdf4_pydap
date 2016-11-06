@@ -49,7 +49,8 @@ from collections import OrderedDict
 import netCDF4.utils as utils
 
 #Internal:
-from . import requests_proxy, requests_sessions, get_cookies
+from . import proxy
+from .. import sessions, get_cookies
 
 python3=False
 default_encoding = 'utf-8'
@@ -74,9 +75,9 @@ class Pydap_Dataset:
         if (isinstance(self.passed_session,requests.Session) or
             isinstance(self.passed_session,requests_cache.core.CachedSession)
             ):
-            self.session=self.passed_session
+            self.session = self.passed_session
         else:
-            self.session=requests_sessions.create_single_session(cache=cache,expire_after=expire_after)
+            self.session = sessions.create_single_session(cache=cache,expire_after=expire_after)
 
         if self.use_certificates:
             self._assign_dataset()
@@ -108,9 +109,9 @@ class Pydap_Dataset:
         # Set data to a Proxy object for BaseType and SequenceType. These
         # variables can then be sliced to retrieve the data on-the-fly.
         for var in walk(self._dataset, BaseType):
-            var.data = requests_proxy.ArrayProxy(var.id, url, var.shape, self._request)
+            var.data = proxy.ArrayProxy(var.id, url, var.shape, self._request)
         for var in walk(self._dataset, SequenceType):
-            var.data = requests_proxy.SequenceProxy(var.id, url, self._request)
+            var.data = proxy.SequenceProxy(var.id, url, self._request)
 
         # Set server-side functions.
         self._dataset.functions = pydap.client.Functions(url)

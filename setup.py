@@ -14,9 +14,8 @@ from setuptools import setup, find_packages
 package_name='netcdf4_pydap'
 setup(
        name = package_name,
-       version = "0.1.4",
-       packages=[package_name],
-       package_dir = {package_name: 'netcdf4_pydap'},
+       version = "0.2",
+       packages = find_packages(),
 #
 #        # metadata for upload to PyPI
         author = "F. B. Laliberte",

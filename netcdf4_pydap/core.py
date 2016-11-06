@@ -28,7 +28,7 @@ import netCDF4.utils as utils
 from pydap.exceptions import ServerError
 
 #Internal:
-from . import requests_http
+from .requests_pydap import http
 
 python3=False
 default_encoding = 'utf-8'
@@ -38,11 +38,11 @@ class Dataset:
                           session=None,username=None,password=None,
                           authentication_url='ESGF', use_certificates=False):
         self._url = url
-        self._pydap_instance = requests_http.Pydap_Dataset(self._url, cache=cache, expire_after=expire_after,
-                                                            timeout=timeout, session=session, 
-                                                            username=username, password=password, 
-                                                            authentication_url=authentication_url,
-                                                            use_certificates=use_certificates)
+        self._pydap_instance = http.Pydap_Dataset(self._url, cache=cache, expire_after=expire_after,
+                                                  timeout=timeout, session=session, 
+                                                  username=username, password=password, 
+                                                  authentication_url=authentication_url,
+                                                  use_certificates=use_certificates)
 
         #Provided for compatibility:
         self.data_model = 'pyDAP'
