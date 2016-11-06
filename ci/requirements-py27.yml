@@ -1,0 +1,13 @@
+name: test_env
+channels:
+  - conda-forge
+dependencies:
+  - python=2.7
+  - pytest
+  - numpy==1.9.3
+  - netcdf4
+  - mechanize
+  - requests
+  - requests_cache
+  - sqlite3
+  - pydap
