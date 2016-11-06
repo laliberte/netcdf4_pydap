@@ -1,6 +1,6 @@
 netcdf4_pydap
 =============
-https://travis-ci.org/laliberte/netcdf4_pydap#
+https://travis-ci.org/laliberte/netcdf4_pydap.svg?branch=master
 
 This code provides enhancements to the `pydap` client package:
 
