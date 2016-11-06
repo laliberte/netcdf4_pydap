@@ -31,7 +31,7 @@ setup(
             "Programming Language :: Python :: 2.7",
             "Programming Language :: Fortran"
         ],
-        long_description=read('README.md'),
+        long_description=read('README.rst'),
         install_requires = [
                             'requests>=1.1.0',
                             'requests_cache',
