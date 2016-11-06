@@ -63,3 +63,22 @@ def test_esgf():
                       [5.09982638e-05,  4.77430549e-05,  4.97323490e-05,  5.43438946e-05,
                        5.26258664e-05]]]
     assert np.isclose(data, expected_data).all()
+
+def test_esgf_print():
+    """
+    Test simple print with ESGF link
+    """
+    import netcdf4_pydap.cas.esgf as esgf
+    cred = {'username': None,
+            'password': os.environ['PASSWORD_ESGF'],
+            'use_certificates': False,
+            'authentication_url': esgf.authentication_url(os.environ['OPENID_ESGF'])}
+    url = ('http://cordexesg.dmi.dk/thredds/dodsC/cordex_general/'
+           'cordex/output/EUR-11/DMI/ICHEC-EC-EARTH/historical/r3i1p1/'
+           'DMI-HIRHAM5/v1/day/pr/v20131119/'
+           'pr_EUR-11_ICHEC-EC-EARTH_historical_r3i1p1_DMI-HIRHAM5_v1_day_19960101-20001231.nc')
+
+    session = requests.Session()
+    with netcdf4_pydap.Dataset(url, session=session, **cred) as dataset:
+        data = dataset.variables['pr'][0, 200:205, 100:105]
+        print(data)
