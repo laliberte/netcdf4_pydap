@@ -210,9 +210,12 @@ class Variable:
         self._var = var
         self.dimensions = self._getdims()
         if self._var.type.descriptor == 'String':
-            if ('DODS.dimName' in self.ncattrs() and
-                'DODS.' + self.getncattr('DODS.dimName') in self.ncattrs() ):
-                self.dtype = np.dtype('S' + self.getncattr('DODS.' + self.getncattr('DODS.dimName')))
+            if ('DODS' in self.ncattrs()):
+                print(self.getncattr('DODS'))
+            if ('DODS' in self.ncattrs() and
+                'dimName' in self.getncattr('DODS') and
+                self.getncattr('DODS')['dimName'] in self.getncattr('DODS')):
+                self.dtype = np.dtype('S' + str(self.getncattr('DODS')[self.getncattr('DODS')['dimName']]))
             else:
                 self.dtype = np.dtype('S100')
         else:
