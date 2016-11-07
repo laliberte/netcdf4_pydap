@@ -35,7 +35,7 @@ ESGF
     import numpy as np
 
     import netcdf4_pydap 
-    import netcdf4_pydap.esgf as esgf
+    import netcdf4_pydap.cas.esgf as esgf
     openid = YOUROPENID
     password = YOURPASSWORD
 
