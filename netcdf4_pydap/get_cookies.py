@@ -49,26 +49,30 @@ def cookieJar(dest_url, username, password, authentication_url=None):
         return cj
 
     #Do not verify certificate (we do not worry about MITM)
-    ssl._https_verify_certificates(False)
-    br = mechanize_login(br, base_url, username, password)
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message=("Unverified HTTPS request is being made. "
+                                                   "Adding certificate verification is strongly advised. "
+                                                   "See: https://urllib3.readthedocs.io/en/latest/security.html"))
+        ssl._https_verify_certificates(False)
+        br = mechanize_login(br, base_url, username, password)
 
-    if ( isinstance(full_url, list) and
-         len(full_url) > 1):
-        for url in full_url[1:]:
-            br = mechanize_login(br, url, username, password)
-        
-    resp = requests.get(dest_url,cookies=cj)
-    if resp.status_code==403:
-        #The user has not registered with a usage category:
-        raise Exception('Credentials were accepted but additional steps must be taken to access'
-                        'data.'
-                        'To do so, navigate to {0}, log in using your credentials '
-                        'Then, follow instructions to properly register for data access.'
-                        'This usually has to be done only once per data service provider.'.format(dest_url))
-    resp.close()
+        if ( isinstance(full_url, list) and
+             len(full_url) > 1):
+            for url in full_url[1:]:
+                br = mechanize_login(br, url, username, password)
+            
+        resp = requests.get(dest_url,cookies=cj)
+        if resp.status_code==403:
+            #The user has not registered with a usage category:
+            raise Exception('Credentials were accepted but additional steps must be taken to access'
+                            'data.'
+                            'To do so, navigate to {0}, log in using your credentials '
+                            'Then, follow instructions to properly register for data access.'
+                            'This usually has to be done only once per data service provider.'.format(dest_url))
+        resp.close()
 
-    #Restore certificate verification
-    ssl._https_verify_certificates(True)
+        #Restore certificate verification
+        ssl._https_verify_certificates(True)
     return cj
 
 def mechanize_login(br, url, username, password):
