@@ -190,9 +190,9 @@ class Pydap_Dataset:
                 resp.close()
                 msg = 'Server error %(code)s: "%(msg)s"' % m.groupdict()
                 raise ServerError(msg)
-        #except KeyError as e:
-        #    #if content-description is missing, pass
-        #    pass
+        except KeyError as e:
+            #if content-description is missing, pass
+            pass
         finally:
             resp.raise_for_status()
 
