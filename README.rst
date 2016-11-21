@@ -7,7 +7,7 @@ netcdf4_pydap
 
 This code provides enhancements to the `pydap` client package:
 
-#. An updated pydap client that uses the `requests` package to handle Central Authentication Services (such as ESGF or NASA Earthdata).
+#. An updated pydap client that uses the `requests` package to handle Central Authentication Services (such as ESGF).
 #. A (partial) compatibility layer with `netcdf4-python`.
 
 Frederic Laliberte
@@ -61,33 +61,10 @@ ESGF
                   'authentication_url' : esgf.authentication_url(openid)}
 
 
-NASA Earthdata
-^^^^^^^^^^^^^^
-There are a few steps required to connect to NASA Earthdata:
-
-#. Create an account at https://usr.earthdata.nasa.gov
-#. Authorize the data to see your profile (NASA calls this adding an app, a la Facebook).
-   Follow http://disc.sci.gsfc.nasa.gov/registration/authorizing-desidsc-data-access-in-earthdata_login
-#. Load OPeNDAP data::
-
-    import matplotlib.pyplot as plt
-    import numpy as np
-    import netcdf4_pydap
-
-    credentials={'username': YOURUSERNAME,
-                 'password': YOURPASSWORD,
-                 'authentication_url':'https://urs.earthdata.nasa.gov/'}
-    url = ('http://goldsmr3.gesdisc.eosdis.nasa.gov:80/opendap/'
-           'MERRA_MONTHLY/MAIMCPASM.5.2.0/1979/MERRA100.prod.assim.instM_3d_asm_Cp.197901.hdf')
-
-    with netcdf4_pydap.Dataset(url,**credentials) as dataset:
-        data = dataset.variables['SLP'][0,:,:]
-        plt.contourf(np.squeeze(data))
-        plt.show()
-
-
 Version History
 ---------------
+
+0.2.1:  Removed support for NASA Earthdata.
 
 0.2:    Travis-CI integration. Limited test suite. Code reorganization.
 

@@ -72,6 +72,10 @@ class Pydap_Dataset:
         self.use_certificates = use_certificates
         self.passed_session = session
 
+        self.username = username
+        self.password = password
+        self.authentication_url = authentication_url
+
         if (isinstance(self.passed_session,requests.Session) or
             isinstance(self.passed_session,requests_cache.core.CachedSession)
             ):
@@ -85,20 +89,15 @@ class Pydap_Dataset:
             try:
                 #Assign dataset:
                 self._assign_dataset()
-                retry = False
             except (requests.exceptions.HTTPError,
-                    requests.exceptions.SSLError,
-                    requests.exceptions.ConnectTimeout):
-                #If error, try to get new cookies and then assign dataset:
-                retry = True
-
-            if retry:
-                #print('Getting ESGF cookies '+esgf_get_cookies.get_node(self._url))
-                self.session.cookies.update(get_cookies.cookieJar(self._url, 
-                                                                       username, 
-                                                                       password, 
-                                                                       authentication_url=authentication_url))
-                self._assign_dataset()
+                   requests.exceptions.SSLError,
+                   requests.exceptions.ConnectTimeout):
+                    #print('Getting ESGF cookies '+esgf_get_cookies.get_node(self._url))
+                    self.session.cookies.update(get_cookies.cookieJar(self._url, 
+                                                                           self.username, 
+                                                                           self.password, 
+                                                                           authentication_url=self.authentication_url))
+                    self._assign_dataset()
 
         # Remove any projections from the url, leaving selections.
         scheme, netloc, path, query, fragment = urlsplit(self._url)
@@ -174,29 +173,16 @@ class Pydap_Dataset:
                                          headers=headers,
                                          allow_redirects=True,
                                          timeout=self.timeout)
+            _check_errors(resp)
         else:
             #cookies are assumed to be passed to the session:
             resp = self.session.get(mod_url, 
                                     headers=headers,
                                     allow_redirects=True,
                                     timeout=self.timeout)
-
-        # When an error is returned, we parse the error message from the
-        # server and return it in a ``ClientError`` exception.
-        try:
-            if resp.headers["content-description"] in ["dods_error", "dods-error"]:
-                m = re.search('code = (?P<code>[^;]+);\s*message = "(?P<msg>.*)"',
-                        resp.content, re.DOTALL | re.MULTILINE)
-                resp.close()
-                msg = 'Server error %(code)s: "%(msg)s"' % m.groupdict()
-                raise ServerError(msg)
-        except KeyError as e:
-            #if content-description is missing, pass
-            pass
-        finally:
-            resp.raise_for_status()
-
+            _check_errors(resp)
         return resp.headers, resp.content, resp
+
 
     def _ddx(self):
         """
@@ -243,3 +229,19 @@ class Pydap_Dataset:
 
     def __exit__(self,atype,value,traceback):
         self.close()
+
+def _check_errors(resp):
+        # When an error is returned, we parse the error message from the
+        # server and return it in a ``ClientError`` exception.
+        try:
+            if resp.headers["content-description"] in ["dods_error", "dods-error"]:
+                m = re.search('code = (?P<code>[^;]+);\s*message = "(?P<msg>.*)"',
+                        resp.content, re.DOTALL | re.MULTILINE)
+                resp.close()
+                msg = 'Server error %(code)s: "%(msg)s"' % m.groupdict()
+                raise ServerError(msg)
+        except KeyError as e:
+            raise ServerError('Server is not OPENDAP')
+        finally:
+            resp.raise_for_status()
+

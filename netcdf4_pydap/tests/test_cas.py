@@ -9,30 +9,30 @@ import pytest
 import numpy as np
 import time
 
-@pytest.mark.xfail(os.getcwd() == '/home/travis/build/laliberte/netcdf4_pydap',
-                   reason=('urs.earthdata.nasa.gov does not seem to accept'
-                           'connections from Travis-CI'))
-def test_urs_earthdata_nasa_gov():
-    """
-    Test the urs.earthdata.nasa.gov portal.
-    """
-    cred = {'username' : os.environ['USERNAME_NASA'],
-            'password' : os.environ['PASSWORD_NASA'],
-            'use_certificates' : False,
-            'authentication_url' : 'https://urs.earthdata.nasa.gov/'}
-    url = ('http://goldsmr3.gesdisc.eosdis.nasa.gov:80/opendap/'
-           'MERRA_MONTHLY/MAIMCPASM.5.2.0/1979/'
-           'MERRA100.prod.assim.instM_3d_asm_Cp.197901.hdf')
-
-    session = requests.Session()
-    with netcdf4_pydap.Dataset(url, session=session, **cred) as dataset:
-        data = dataset.variables['SLP'][0, :5, :5]
-    expected_data = [[[99066.15625, 99066.15625, 99066.15625, 99066.15625, 99066.15625],
-                      [98868.15625, 98870.15625, 98872.15625, 98874.15625, 98874.15625],
-                      [98798.15625, 98810.15625, 98820.15625, 98832.15625, 98844.15625],
-                      [98856.15625, 98828.15625, 98756.15625, 98710.15625, 98776.15625],
-                      [99070.15625, 99098.15625, 99048.15625, 98984.15625, 99032.15625]]]
-    assert (data == expected_data).all()
+#@pytest.mark.xfail(os.getcwd() == '/home/travis/build/laliberte/netcdf4_pydap',
+#                   reason=('urs.earthdata.nasa.gov does not seem to accept'
+#                           'connections from Travis-CI'))
+#def test_urs_earthdata_nasa_gov():
+#    """
+#    Test the urs.earthdata.nasa.gov portal.
+#    """
+#    cred = {'username' : os.environ['USERNAME_NASA'],
+#            'password' : os.environ['PASSWORD_NASA'],
+#            'use_certificates' : False,
+#            'authentication_url' : 'https://urs.earthdata.nasa.gov/'}
+#    url = ('http://goldsmr3.gesdisc.eosdis.nasa.gov:80/opendap/'
+#           'MERRA_MONTHLY/MAIMCPASM.5.2.0/1979/'
+#           'MERRA100.prod.assim.instM_3d_asm_Cp.197901.hdf')
+#
+#    session = requests.Session()
+#    with netcdf4_pydap.Dataset(url, session=session, **cred) as dataset:
+#        data = dataset.variables['SLP'][0, :5, :5]
+#    expected_data = [[[99066.15625, 99066.15625, 99066.15625, 99066.15625, 99066.15625],
+#                      [98868.15625, 98870.15625, 98872.15625, 98874.15625, 98874.15625],
+#                      [98798.15625, 98810.15625, 98820.15625, 98832.15625, 98844.15625],
+#                      [98856.15625, 98828.15625, 98756.15625, 98710.15625, 98776.15625],
+#                      [99070.15625, 99098.15625, 99048.15625, 98984.15625, 99032.15625]]]
+#    assert (data == expected_data).all()
 
 
 def test_esgf():
@@ -82,3 +82,5 @@ def test_esgf_print():
     with netcdf4_pydap.Dataset(url, session=session, **cred) as dataset:
         data = dataset.variables['pr'][0, 200:205, 100:105]
         print(data)
+
+

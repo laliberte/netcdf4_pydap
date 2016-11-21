@@ -61,7 +61,7 @@ def cookieJar(dest_url, username, password, authentication_url=None):
             for url in full_url[1:]:
                 br = mechanize_login(br, url, username, password)
             
-        resp = requests.get(dest_url,cookies=cj)
+        resp = requests.get(dest_url, cookies=cj)
         if resp.status_code==403:
             #The user has not registered with a usage category:
             raise Exception('Credentials were accepted but additional steps must be taken to access'
