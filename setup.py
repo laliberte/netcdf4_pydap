@@ -36,7 +36,7 @@ setup(
                             'requests>=1.1.0',
                             'requests_cache',
                             'netCDF4',
-                            'pydap=3.1.1',
+                            'pydap==3.1.1',
                             'mechanize'],
         zip_safe=False,
     )
