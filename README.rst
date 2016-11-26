@@ -64,6 +64,8 @@ ESGF
 Version History
 ---------------
 
+0.2.2:  Pydap 3.1.1 is now a requirement.
+
 0.2.1:  Removed support for NASA Earthdata.
 
 0.2:    Travis-CI integration. Limited test suite. Code reorganization.

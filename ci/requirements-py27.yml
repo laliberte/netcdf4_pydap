@@ -7,7 +7,7 @@ dependencies:
   - numpy
   - netcdf4
   - mechanize
-  - pydap
+  - pydap=3.1.1
   - requests
   - pip:
       - requests_cache
