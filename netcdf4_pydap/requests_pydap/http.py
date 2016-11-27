@@ -50,7 +50,8 @@ import netCDF4.utils as utils
 
 #Internal:
 from . import proxy
-from .. import sessions, get_cookies
+from .. import sessions
+from ..cas import get_cookies
 
 python3=False
 default_encoding = 'utf-8'
@@ -64,8 +65,9 @@ _private_atts =\
 
 class Pydap_Dataset:
     def __init__(self,url,cache=None,expire_after=datetime.timedelta(hours=1),timeout=120,
-                          session=None,username=None,password=None,
-                          authentication_url=None, use_certificates=False):
+                 session=None,username=None,password=None,
+                 authentication_url=None, use_certificates=False,
+                 authenticate=False):
 
         self._url = url
         self.timeout = timeout
@@ -86,18 +88,20 @@ class Pydap_Dataset:
         if self.use_certificates:
             self._assign_dataset()
         else:
+            if authenticate:
+                self.session = get_cookies.setup_session(self.authentication_url,
+                                                         username=self.username,
+                                                         password=self.password,
+                                                         session=self.session,
+                                                         verify=False,
+                                                         check_url=self._url)
             try:
                 #Assign dataset:
                 self._assign_dataset()
             except (requests.exceptions.HTTPError,
                    requests.exceptions.SSLError,
                    requests.exceptions.ConnectTimeout):
-                    #print('Getting ESGF cookies '+esgf_get_cookies.get_node(self._url))
-                    self.session.cookies.update(get_cookies.cookieJar(self._url, 
-                                                                           self.username, 
-                                                                           self.password, 
-                                                                           authentication_url=self.authentication_url))
-                    self._assign_dataset()
+                    raise requests.exceptions.HTTPError('Try authenticating')
 
         # Remove any projections from the url, leaving selections.
         scheme, netloc, path, query, fragment = urlsplit(self._url)

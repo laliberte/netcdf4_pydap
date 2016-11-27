@@ -12,27 +12,29 @@ import time
 #@pytest.mark.xfail(os.getcwd() == '/home/travis/build/laliberte/netcdf4_pydap',
 #                   reason=('urs.earthdata.nasa.gov does not seem to accept'
 #                           'connections from Travis-CI'))
-#def test_urs_earthdata_nasa_gov():
-#    """
-#    Test the urs.earthdata.nasa.gov portal.
-#    """
-#    cred = {'username' : os.environ['USERNAME_NASA'],
-#            'password' : os.environ['PASSWORD_NASA'],
-#            'use_certificates' : False,
-#            'authentication_url' : 'https://urs.earthdata.nasa.gov/'}
-#    url = ('http://goldsmr3.gesdisc.eosdis.nasa.gov:80/opendap/'
-#           'MERRA_MONTHLY/MAIMCPASM.5.2.0/1979/'
-#           'MERRA100.prod.assim.instM_3d_asm_Cp.197901.hdf')
-#
-#    session = requests.Session()
-#    with netcdf4_pydap.Dataset(url, session=session, **cred) as dataset:
-#        data = dataset.variables['SLP'][0, :5, :5]
-#    expected_data = [[[99066.15625, 99066.15625, 99066.15625, 99066.15625, 99066.15625],
-#                      [98868.15625, 98870.15625, 98872.15625, 98874.15625, 98874.15625],
-#                      [98798.15625, 98810.15625, 98820.15625, 98832.15625, 98844.15625],
-#                      [98856.15625, 98828.15625, 98756.15625, 98710.15625, 98776.15625],
-#                      [99070.15625, 99098.15625, 99048.15625, 98984.15625, 99032.15625]]]
-#    assert (data == expected_data).all()
+def test_urs_earthdata_nasa_gov():
+    """
+    Test the urs.earthdata.nasa.gov portal.
+    """
+    cred = {'username' : os.environ['USERNAME_URS'],
+            'password' : os.environ['PASSWORD_URS'],
+            'use_certificates' : False,
+            'authentication_url' : 'https://urs.earthdata.nasa.gov/'}
+    url = ('http://goldsmr3.gesdisc.eosdis.nasa.gov:80/opendap/'
+           'MERRA_MONTHLY/MAIMCPASM.5.2.0/1979/'
+           'MERRA100.prod.assim.instM_3d_asm_Cp.197901.hdf')
+
+    session = requests.Session()
+    with netcdf4_pydap.Dataset(url, session=session, **cred) as dataset:
+        data = dataset.variables['SLP'][0, :5, :5]
+    expected_data = [[[99066.15625, 99066.15625, 99066.15625, 99066.15625, 99066.15625],
+                      [98868.15625, 98870.15625, 98872.15625, 98874.15625, 98874.15625],
+                      [98798.15625, 98810.15625, 98820.15625, 98832.15625, 98844.15625],
+                      [98856.15625, 98828.15625, 98756.15625, 98710.15625, 98776.15625],
+                      [99070.15625, 99098.15625, 99048.15625, 98984.15625, 99032.15625]]]
+    assert (data == expected_data).all()
+    # Make sure that credentials were propagated in session object:
+    assert ('nasa_gesdisc_data_archive' in session.cookies.get_dict())
 
 
 def test_esgf():
@@ -43,7 +45,7 @@ def test_esgf():
     cred = {'username': None,
             'password': os.environ['PASSWORD_ESGF'],
             'use_certificates': False,
-            'authentication_url': esgf.authentication_url(os.environ['OPENID_ESGF'])}
+            'authentication_url': esgf._uri(os.environ['OPENID_ESGF'])}
     url = ('http://cordexesg.dmi.dk/thredds/dodsC/cordex_general/'
            'cordex/output/EUR-11/DMI/ICHEC-EC-EARTH/historical/r3i1p1/'
            'DMI-HIRHAM5/v1/day/pr/v20131119/'
@@ -63,6 +65,8 @@ def test_esgf():
                       [5.09982638e-05,  4.77430549e-05,  4.97323490e-05,  5.43438946e-05,
                        5.26258664e-05]]]
     assert np.isclose(data, expected_data).all()
+    # Make sure that credentials were propagated in session object:
+    assert ('esg.openid.saml.cookie' in session.cookies.get_dict())
 
 def test_esgf_print():
     """
@@ -72,7 +76,7 @@ def test_esgf_print():
     cred = {'username': None,
             'password': os.environ['PASSWORD_ESGF'],
             'use_certificates': False,
-            'authentication_url': esgf.authentication_url(os.environ['OPENID_ESGF'])}
+            'authentication_url': esgf._uri(os.environ['OPENID_ESGF'])}
     url = ('http://cordexesg.dmi.dk/thredds/dodsC/cordex_general/'
            'cordex/output/EUR-11/DMI/ICHEC-EC-EARTH/historical/r3i1p1/'
            'DMI-HIRHAM5/v1/day/pr/v20131119/'

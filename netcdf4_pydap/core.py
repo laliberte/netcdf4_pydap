@@ -37,13 +37,24 @@ class Dataset:
     def __init__(self, url, cache=None,
                  expire_after=datetime.timedelta(hours=1), timeout=120,
                  session=None, username=None, password=None,
-                 authentication_url='ESGF', use_certificates=False):
+                 authentication_url=None, use_certificates=False):
         self._url = url
-        self._pydap_instance = http.Pydap_Dataset(self._url, cache=cache, expire_after=expire_after,
-                                                  timeout=timeout, session=session, 
-                                                  username=username, password=password, 
-                                                  authentication_url=authentication_url,
-                                                  use_certificates=use_certificates)
+        self.cache = cache
+        self.expire_after = expire_after
+        self.timeout = timeout
+        self.session = session
+        self.username = username
+        self.password = password
+        self.authentication_url = authentication_url
+        self.use_certificates = use_certificates
+
+        try:
+            self.assign_pydap_instance()
+        except requests.exceptions.HTTPError as e:
+            if str(e) == 'Try authenticating':
+                self.assign_pydap_instance(authenticate=True)
+            else:
+                raise
 
         #Provided for compatibility:
         self.data_model = 'pyDAP'
@@ -59,6 +70,15 @@ class Dataset:
 
         self.groups = OrderedDict()
         return
+
+    def assign_pydap_instance(self, authenticate=False):
+        self._pydap_instance = http.Pydap_Dataset(self._url, cache=self.cache,
+                                                  expire_after=self.expire_after,
+                                                  timeout=self.timeout, session=self.session, 
+                                                  username=self.username, password=self.password, 
+                                                  authentication_url=self.authentication_url,
+                                                  use_certificates=self.use_certificates,
+                                                  authenticate=authenticate)
 
     def __enter__(self):
         return self
@@ -279,15 +299,22 @@ class Variable:
 
     def __getitem__(self, getitem_tuple):
         try:
-            return self._var.array.__getitem__(getitem_tuple)
-        except (AttributeError, ServerError,requests.exceptions.HTTPError) as e:
-            if ( 
-                 isinstance(getitem_tuple, slice) and
-                 getitem_tuple == _PhonyVariable()[:]):
-                #A single dimension ellipsis was requested. Use netCDF4 convention:
-                return self[...]
+            try:
+                return self._var.array.__getitem__(getitem_tuple)
+            except (AttributeError, ServerError, requests.exceptions.HTTPError) as e:
+                if ( 
+                     isinstance(getitem_tuple, slice) and
+                     getitem_tuple == _PhonyVariable()[:]):
+                    #A single dimension ellipsis was requested. Use netCDF4 convention:
+                    return self[...]
+                else:
+                    return self._var.__getitem__(getitem_tuple)
+        except requests.exceptions.HTTPError as e:
+            if str(e).startswith('401'):
+                self._grp.assign_pydap_instance(authenticate=True)
+                return self.__getitem__(getitem_tuple)
             else:
-                return self._var.__getitem__(getitem_tuple)
+                raise
 
     def __len__(self):
         if not self.shape:
