@@ -1,22 +1,43 @@
-import urllib
-import warnings
+from six.moves.urllib.parse import quote_plus
+from . import get_cookies
 
-def authentication_url(openid):
+
+def setup_session(openid, password, username=None,
+                  check_url=None,
+                  session=None):
+    """
+    A special call to get_cookies.setup_session that is tailored for
+    ESGF credentials.
+
+    username should only be necessary for a CEDA openid.
+    """
+    return get_cookies.setup_session(_uri(openid),
+                                     username=username,
+                                     password=password,
+                                     check_url=check_url,
+                                     session=session,
+                                     verify=False)
+
+
+def _uri(openid):
     '''
     Create ESGF authentication url.
-    This function might be sensitive to a future evolution of the ESGF security.
+    This function might be sensitive to a
+    future evolution of the ESGF security.
     '''
     def generate_url(dest_url):
-        dest_node = get_node(dest_url)
+        dest_node = _get_node(dest_url)
 
-        url = (dest_node + 
-               '/esg-orp/j_spring_openid_security_check.htm?openid_identifier=' + 
-               urllib.quote_plus(openid) )
-        if get_node(openid) == 'https://ceda.ac.uk':
+        url = (dest_node +
+               '/esg-orp/j_spring_openid_security_check.htm?'
+               'openid_identifier=' +
+               quote_plus(openid))
+        if _get_node(openid) == 'https://ceda.ac.uk':
             return [url, None]
         else:
             return url
     return generate_url
 
-def get_node(url):
+
+def _get_node(url):
         return '/'.join(url.split('/')[:3]).replace('http:', 'https:')
