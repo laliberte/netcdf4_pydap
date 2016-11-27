@@ -33,6 +33,8 @@ def test_urs_earthdata_nasa_gov():
                       [98856.15625, 98828.15625, 98756.15625, 98710.15625, 98776.15625],
                       [99070.15625, 99098.15625, 99048.15625, 98984.15625, 99032.15625]]]
     assert (data == expected_data).all()
+    # Make sure that credentials were propagated in session object:
+    assert ('nasa_gesdisc_data_archive' in session.cookies.get_dict())
 
 
 def test_esgf():
@@ -63,6 +65,8 @@ def test_esgf():
                       [5.09982638e-05,  4.77430549e-05,  4.97323490e-05,  5.43438946e-05,
                        5.26258664e-05]]]
     assert np.isclose(data, expected_data).all()
+    # Make sure that credentials were propagated in session object:
+    assert ('esg.openid.saml.cookie' in session.cookies.get_dict())
 
 def test_esgf_print():
     """
