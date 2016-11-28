@@ -68,6 +68,7 @@ def test_esgf():
     # Make sure that credentials were propagated in session object:
     assert ('esg.openid.saml.cookie' in session.cookies.get_dict())
 
+
 def test_esgf_print():
     """
     Test simple print with ESGF link

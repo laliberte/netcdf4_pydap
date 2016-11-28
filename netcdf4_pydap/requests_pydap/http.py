@@ -85,23 +85,15 @@ class Pydap_Dataset:
         else:
             self.session = sessions.create_single_session(cache=cache,expire_after=expire_after)
 
-        if self.use_certificates:
-            self._assign_dataset()
-        else:
-            if authenticate:
-                self.session = get_cookies.setup_session(self.authentication_url,
-                                                         username=self.username,
-                                                         password=self.password,
-                                                         session=self.session,
-                                                         verify=False,
-                                                         check_url=self._url)
-            try:
-                #Assign dataset:
-                self._assign_dataset()
-            except (requests.exceptions.HTTPError,
-                   requests.exceptions.SSLError,
-                   requests.exceptions.ConnectTimeout):
-                    raise requests.exceptions.HTTPError('Try authenticating')
+        if (not self.use_certificates and authenticate):
+            self.session = get_cookies.setup_session(self.authentication_url,
+                                                     username=self.username,
+                                                     password=self.password,
+                                                     session=self.session,
+                                                     verify=False,
+                                                     check_url=self._url)
+        #Assign dataset:
+        self._assign_dataset()
 
         # Remove any projections from the url, leaving selections.
         scheme, netloc, path, query, fragment = urlsplit(self._url)

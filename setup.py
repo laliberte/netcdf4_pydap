@@ -37,6 +37,6 @@ setup(
                             'requests_cache',
                             'netCDF4',
                             'pydap==3.1.1',
-                            'mechanicalsoup'],
+                            'MechanicalSoup'],
         zip_safe=False,
     )

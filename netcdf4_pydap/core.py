@@ -51,7 +51,7 @@ class Dataset:
         try:
             self.assign_pydap_instance()
         except requests.exceptions.HTTPError as e:
-            if str(e) == 'Try authenticating':
+            if str(e).startswith('401'):
                 self.assign_pydap_instance(authenticate=True)
             else:
                 raise
@@ -79,6 +79,7 @@ class Dataset:
                                                   authentication_url=self.authentication_url,
                                                   use_certificates=self.use_certificates,
                                                   authenticate=authenticate)
+        return
 
     def __enter__(self):
         return self
