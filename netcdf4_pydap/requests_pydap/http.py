@@ -93,7 +93,11 @@ class Pydap_Dataset:
                                                      verify=False,
                                                      check_url=self._url)
         #Assign dataset:
-        self._assign_dataset()
+        try:
+            self._assign_dataset()
+        except (requests.exceptions.SSLError,
+               requests.exceptions.ConnectTimeout) as e:
+                raise requests.exceptions.HTTPError('401 ' + str(e))
 
         # Remove any projections from the url, leaving selections.
         scheme, netloc, path, query, fragment = urlsplit(self._url)
