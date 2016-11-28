@@ -51,7 +51,8 @@ class Dataset:
         try:
             self.assign_pydap_instance()
         except requests.exceptions.HTTPError as e:
-            if str(e).startswith('401'):
+            if str(e).startswith('40'):
+                # 400 type error. Try to authenticate:
                 self.assign_pydap_instance(authenticate=True)
             else:
                 raise
@@ -311,7 +312,8 @@ class Variable:
                 else:
                     return self._var.__getitem__(getitem_tuple)
         except requests.exceptions.HTTPError as e:
-            if str(e).startswith('401'):
+            if str(e).startswith('40'):
+                # 400 type error. Try to authenticate:
                 self._grp.assign_pydap_instance(authenticate=True)
                 return self.__getitem__(getitem_tuple)
             else:
