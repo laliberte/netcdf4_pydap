@@ -12,7 +12,8 @@ import requests_cache
 import datetime
 
 #Internal:
-from . import sessions, get_cookies
+from . import sessions
+from .cas import get_cookies
 
 class Dataset:
     def __init__(self,url,
@@ -90,10 +91,11 @@ class Dataset:
 
             if retry:
                 #there could be something wrong with the cookies. Get them again:
-                self.session.cookies.update(get_cookies.cookieJar(self._url,
-                                                                  self.username,
-                                                                  self.password,
-                                                                  authentication_url=self.authentication_url))
+                self.session = get_cookies.setup_session(self.authentication_url,
+                                                         username=self.username,
+                                                         password=self.password,
+                                                         check_url=self._url,
+                                                         session=self.session)
                 #Retry grabbing the file:
                 self.response = self.session.get(self._url, 
                                                  headers=headers,
