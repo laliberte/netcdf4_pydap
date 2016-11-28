@@ -99,7 +99,11 @@ def mechanicalsoup_login(br, url, username, password,
     if not hasattr(login_page, 'soup'):
         return login_page
 
-    login_form = login_page.soup.select('form')[0]
+    try:
+        login_form = login_page.soup.select('form')[0]
+    except IndexError:
+        return login_page
+
     try:
         login_form.select('#' + username_field)[0]['value'] = username
     except IndexError:

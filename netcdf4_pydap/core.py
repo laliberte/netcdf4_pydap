@@ -48,14 +48,7 @@ class Dataset:
         self.authentication_url = authentication_url
         self.use_certificates = use_certificates
 
-        try:
-            self.assign_pydap_instance()
-        except requests.exceptions.HTTPError as e:
-            if str(e).startswith('40'):
-                # 400 type error. Try to authenticate:
-                self.assign_pydap_instance(authenticate=True)
-            else:
-                raise
+        _authenticate_or_raise(self.assign_pydap_instance)
 
         #Provided for compatibility:
         self.data_model = 'pyDAP'
@@ -314,10 +307,11 @@ class Variable:
         except requests.exceptions.HTTPError as e:
             if str(e).startswith('40'):
                 # 400 type error. Try to authenticate:
-                self._grp.assign_pydap_instance(authenticate=True)
+                _authenticate_or_raise(self._grp.assign_pydap_instance,
+                                       authenticate=True)
                 return self.__getitem__(getitem_tuple)
             else:
-                raise
+                raise ServerError(str(e))
 
     def __len__(self):
         if not self.shape:
@@ -391,6 +385,20 @@ class Dimension:
             return repr(type(self))+" (unlimited): name = '%s', size = %s\n" % (self._name, len(self))
         else:
             return repr(type(self))+": name = '%s', size = %s\n" % (self._name, len(self))
+
+
+def _authenticate_or_raise(fcn_handle, authenticate=False):
+    # First try without authentication
+    try:
+        fcn_handle(authenticate=authenticate)
+    except requests.exceptions.HTTPError as e:
+        if (not authenticate and
+            str(e).startswith('40')):
+            # If first try and
+            # 400 type error. Try to authenticate:
+            _authenticate_or_raise(fcn_handle, authenticate=True)
+        else:
+            raise ServerError(str(e))
 
 
 class _PhonyVariable:
