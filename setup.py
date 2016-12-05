@@ -14,7 +14,7 @@ from setuptools import setup, find_packages
 package_name='netcdf4_pydap'
 setup(
        name = package_name,
-       version = "0.2.3",
+       version = "0.2.4",
        packages = find_packages(),
 #
 #        # metadata for upload to PyPI

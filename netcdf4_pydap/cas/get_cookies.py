@@ -70,30 +70,68 @@ def setup_session(uri,
         response = mechanicalsoup_login(br, url, username, password,
                                         username_field=username_field,
                                         password_field=password_field)
+
+        # If there are further security levels.
+        # At the moment only used for CEDA OPENID:
         if (isinstance(full_url, list) and
            len(full_url) > 1):
-            # If there are further security levels:
             for url in full_url[1:]:
                 response = mechanicalsoup_login(br, response.url,
                                                 username, password,
                                                 username_field=username_field,
-                                                password_field=password_field)
+                                                password_field=password_field,
+                                                notify=(url is not None))
         response.close()
 
         if check_url:
-            res = session.get(check_url, auth=(username, password))
-            if res.status_code == 401:
-                res = session.get(res.url, auth=(username, password))
-            res.close()
+            if (username is not None and
+               password is not None):
+                res = session.get(check_url, auth=(username, password))
+                if res.status_code == 401:
+                    res = session.get(res.url, auth=(username, password))
+                res.close()
+            raise_if_form_exists(check_url, session)
 
     if not verify:
         session.verify = verify_flag
     return session
 
 
+def raise_if_form_exists(url, session):
+    """
+    This function raises a UserWarning if the link has forms
+    """
+
+    user_warning = ('Navigate to {0}, login and follow instructions. '.format(url) +
+                    'It is likely that you have to perform some one-time'
+                    'registration steps before acessing this data.')
+
+    # This is important for the python 2.6 build:
+    try:
+        from six.moves.html_parser import HTMLParseError
+    except ImportError as e:
+        # HTMLParseError is removed in Python 3.5. Since it can never be
+        # thrown in 3.5, we can just define our own class as a placeholder.
+        # *from bs4/builder/_htmlparser.py
+        class HTMLParseError(Exception):
+            pass
+
+    br = mechanicalsoup.Browser(session=session)
+    try:
+        login_page = br.get(url)
+    except HTMLParseError:
+        # This is important for the python 2.6 build:
+        raise UserWarning(user_warning)
+
+    if ((hasattr(login_page, 'soup') and
+       len(login_page.soup.select('form')) > 0)):
+        raise UserWarning(user_warning)
+
+
 def mechanicalsoup_login(br, url, username, password,
                          username_field='username',
-                         password_field='password'):
+                         password_field='password',
+                         notify=True):
     login_page = br.get(url)
 
     if not hasattr(login_page, 'soup'):
@@ -102,28 +140,35 @@ def mechanicalsoup_login(br, url, username, password,
     try:
         login_form = login_page.soup.select('form')[0]
     except IndexError:
+        # There are no login form.
+        # Assume that we are logged-in
         return login_page
 
     try:
         login_form.select('#' + username_field)[0]['value'] = username
     except IndexError:
+        # There might not need a username (e.g. ESGF)
         pass
 
     try:
         login_form.select('#' + password_field)[0]['value'] = password
     except IndexError:
-        pass
-    #    if url is not None:
-    #        br.close()
-        raise Exception('Navigate to {0}. '
-                        'If you are unable to '
-                        'login, you must either '
-                        'wait or use authentication '
-                        'from another service.'
-                        .format(url))
-    #    else:
-    #        pass
+        if notify:
+            # If there is no password_field, it might be because
+            # something should be handled in the browser
+            # for the first attempt. This is common when using
+            # pydap with the ESGF for the first time.
+            br.close()
+            raise Exception('Navigate to {0}. '
+                            'If you are unable to '
+                            'login, you must either '
+                            'wait or use authentication '
+                            'from another service.'
+                            .format(url))
+        else:
+            pass
 
+    # This is specific for CEDA OPENID:
     try:
         login_form.find("remember").items[0].selected = True
     except AttributeError:
