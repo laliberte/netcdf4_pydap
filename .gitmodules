@@ -1,0 +1,3 @@
+[submodule "pydap"]
+	path = pydap
+	url = https://github.com/laliberte/pydap
