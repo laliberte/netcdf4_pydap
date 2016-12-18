@@ -88,6 +88,8 @@ There are a few steps required to connect to NASA Earthdata:
 Version History
 ---------------
 
+0.2.6:  Another bug fix when getting cookies.
+
 0.2.5:  Bug fix when getting cookies.
 
 0.2.4:  Bug fix for ESGF.
