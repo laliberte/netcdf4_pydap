@@ -25,4 +25,4 @@ install:
   - python setup.py install
 
 script:
-  - py.test netcdf4_pydap
+  - py.test netcdf4_pydap --ignore=netcdf4_pydap/pydap
