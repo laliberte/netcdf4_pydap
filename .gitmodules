@@ -1,3 +1,0 @@
-[submodule "pydap"]
-	path = netcdf4_pydap/pydap/pydap
-	url = https://github.com/laliberte/pydap
