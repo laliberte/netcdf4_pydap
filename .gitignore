@@ -1,1 +1,8 @@
 *.pyc
+netcdf4_pydap.egg-info/
+.cache/
+htmlcov/
+.coverage
+build/
+dist/
+*.sqlite

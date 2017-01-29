@@ -12,10 +12,9 @@ def test_urs_earthdata_nasa_gov():
     """
     Test the urs.earthdata.nasa.gov portal.
     """
-    cred = {'username': os.environ.get('USERNAME_URS'),
-            'password': os.environ.get('PASSWORD_URS'),
-            'use_certificates': False,
-            'authentication_url': 'https://urs.earthdata.nasa.gov/'}
+    cred = {'username': os.environ['USERNAME_URS'],
+            'password': os.environ['PASSWORD_URS'],
+            'authentication_uri': 'https://urs.earthdata.nasa.gov/'}
     url = ('http://goldsmr3.gesdisc.eosdis.nasa.gov:80/opendap/'
            'MERRA_MONTHLY/MAIMCPASM.5.2.0/1979/'
            'MERRA100.prod.assim.instM_3d_asm_Cp.197901.hdf')
@@ -42,56 +41,23 @@ def test_esgf():
     """
     Test for ESGF
     """
-    import netcdf4_pydap.cas.esgf as esgf
     cred = {'username': None,
-            'password': os.environ.get('PASSWORD_ESGF'),
-            'use_certificates': False,
-            'authentication_url': esgf._uri(os.environ.get('OPENID_ESGF'))}
-    url = ('http://cordexesg.dmi.dk/thredds/dodsC/cordex_general/'
-           'cordex/output/EUR-11/DMI/ICHEC-EC-EARTH/historical/r3i1p1/'
-           'DMI-HIRHAM5/v1/day/pr/v20131119/'
-           'pr_EUR-11_ICHEC-EC-EARTH_historical_r3i1p1_DMI-HIRHAM5_v1_day_'
-           '19960101-20001231.nc')
+            'password': os.environ['PASSWORD_ESGF'],
+            'openid': os.environ['OPENID_ESGF'],
+            'authentication_uri': 'ESGF'}
+    url = ('http://aims3.llnl.gov/thredds/dodsC/'
+           'cmip5_css02_data/cmip5/output1/CCCma/CanCM4/'
+           'decadal1995/fx/atmos/fx/r0i0p0/orog/1/'
+           'orog_fx_CanCM4_decadal1995_r0i0p0.nc')
 
     session = requests.Session()
     with netcdf4_pydap.Dataset(url, session=session, **cred) as dataset:
-        data = dataset.variables['pr'][0, 200:205, 100:105]
-    expected_data = [[[5.23546005e-05, 5.48864300e-05, 5.23546005e-05,
-                       6.23914966e-05,
-                       6.26627589e-05],
-                      [5.45247385e-05, 5.67853021e-05, 5.90458621e-05,
-                       6.51041701e-05,
-                       6.23914966e-05],
-                      [5.57906533e-05, 5.84129048e-05, 6.37478297e-05,
-                       5.99500854e-05,
-                       5.85033267e-05],
-                      [5.44343166e-05, 5.45247385e-05, 5.60619228e-05,
-                       5.58810752e-05,
-                       4.91898136e-05],
-                      [5.09982638e-05, 4.77430549e-05, 4.97323490e-05,
-                       5.43438946e-05,
-                       5.26258664e-05]]]
+        data = dataset['orog'][50:55, 50:55]
+    expected_data = [[197.70425, 16.319595, 0.0, 0.0, 0.0],
+                     [0.0, 0.0, 0.0, 0.0, 0.0],
+                     [0.0, 0.0, 0.0, 0.0, 0.0],
+                     [677.014, 628.29675, 551.06, 455.5758, 343.7354],
+                     [1268.3304, 1287.9553, 1161.0402, 978.3153, 809.143]]
     assert np.isclose(data, expected_data).all()
     # Make sure that credentials were propagated in session object:
     assert ('esg.openid.saml.cookie' in session.cookies.get_dict())
-
-
-def test_esgf_print():
-    """
-    Test simple print with ESGF link
-    """
-    import netcdf4_pydap.cas.esgf as esgf
-    cred = {'username': None,
-            'password': os.environ.get('PASSWORD_ESGF'),
-            'use_certificates': False,
-            'authentication_url': esgf._uri(os.environ.get('OPENID_ESGF'))}
-    url = ('http://cordexesg.dmi.dk/thredds/dodsC/cordex_general/'
-           'cordex/output/EUR-11/DMI/ICHEC-EC-EARTH/historical/r3i1p1/'
-           'DMI-HIRHAM5/v1/day/pr/v20131119/'
-           'pr_EUR-11_ICHEC-EC-EARTH_historical_r3i1p1_DMI-HIRHAM5_v1_day_'
-           '19960101-20001231.nc')
-
-    session = requests.Session()
-    with netcdf4_pydap.Dataset(url, session=session, **cred) as dataset:
-        data = dataset.variables['pr'][0, 200:205, 100:105]
-        print(data)

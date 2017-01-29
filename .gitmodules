@@ -1,3 +1,3 @@
-[submodule "netcdf4_pydap/pydap/pydap"]
-	path = netcdf4_pydap/pydap/pydap
+[submodule "netcdf4_pydap/pydap_fork/pydap"]
+	path = netcdf4_pydap/pydap_fork/pydap
 	url = https://github.com/laliberte/pydap.git
