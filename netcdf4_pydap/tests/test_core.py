@@ -282,16 +282,6 @@ def test_dataset_get_variable_by_attribute(app):
 def test_dimension_unlimited(app):
     with Dataset('http://localhost:8000/',
                  application=app) as dataset:
-        assert not dataset.dimensions['index'].isunlimited()
-        assert isinstance(dataset._pydap_dataset
-                          .attributes['DODS_EXTRA'], dict)
-        assert 'Unlimited_Dimension' not in (dataset
-                                             ._pydap_dataset
-                                             .attributes['DODS_EXTRA'])
-        (dataset._pydap_dataset
-         .attributes['DODS_EXTRA']
-         .update({'Unlimited_Dimension': 'index'}))
-        dataset.dimensions = dataset._get_dims(dataset._pydap_dataset)
         assert dataset.dimensions['index'].isunlimited()
 
 
@@ -301,30 +291,11 @@ def test_dimension_group(app):
         assert dataset.dimensions['index'].group() == dataset
 
 
-def test_dimension_repr(app):
-    expected_repr = ("<class 'netcdf4_pydap.pydap_fork.pydap.src.pydap.apis.netCDF4.Dimension'>: "
-                     "name = 'index', size = 4")
-    with Dataset('http://localhost:8000/',
-                 application=app) as dataset:
-        assert repr(dataset
-                    .dimensions['index']).strip() == expected_repr
-
-
 def test_dimension_unlimited_repr(app):
     expected_repr = ("<class 'netcdf4_pydap.pydap_fork.pydap.src.pydap.apis.netCDF4.Dimension'> (unlimited): "
                      "name = 'index', size = 4")
     with Dataset('http://localhost:8000/',
                  application=app) as dataset:
-        assert not dataset.dimensions['index'].isunlimited()
-        assert isinstance(dataset._pydap_dataset
-                          .attributes['DODS_EXTRA'], dict)
-        assert 'Unlimited_Dimension' not in (dataset
-                                             ._pydap_dataset
-                                             .attributes['DODS_EXTRA'])
-        (dataset._pydap_dataset
-         .attributes['DODS_EXTRA']
-         .update({'Unlimited_Dimension': 'index'}))
-        dataset.dimensions = dataset._get_dims(dataset._pydap_dataset)
         assert dataset.dimensions['index'].isunlimited()
         assert repr(dataset
                     .dimensions['index']).strip() == expected_repr
@@ -356,28 +327,14 @@ def test_variable_repr(app):
     expected_repr = """<class 'netcdf4_pydap.pydap_fork.pydap.src.pydap.apis.netCDF4.Variable'>
 |S100 station(index)
     long_name: Station Name
-unlimited dimensions: 
+unlimited dimensions: index
 current shape = (4,)
 """
     with Dataset('http://localhost:8000/',
                  application=app) as dataset:
         variable = dataset.variables['station']
+        assert dataset.dimensions['index'].isunlimited()
         assert repr(variable) == expected_repr
-
-        # Mock unlimited dimension:
-        assert not dataset.dimensions['index'].isunlimited()
-        assert isinstance(dataset._pydap_dataset
-                          .attributes['DODS_EXTRA'], dict)
-        assert 'Unlimited_Dimension' not in (dataset
-                                             ._pydap_dataset
-                                             .attributes['DODS_EXTRA'])
-        (dataset._pydap_dataset
-         .attributes['DODS_EXTRA']
-         .update({'Unlimited_Dimension': 'index'}))
-        dataset.dimensions = dataset._get_dims(dataset._pydap_dataset)
-        assert repr(variable) == (expected_repr
-                                  .replace('unlimited dimensions: ',
-                                           'unlimited dimensions: index'))
 
 
 def test_variable_hdf5_properties(app):
