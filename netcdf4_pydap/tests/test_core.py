@@ -30,6 +30,10 @@ class MockErrors:
                               len(self.errors) - 1)]
 
 
+def mock_function(*args, **kwargs):
+    return
+
+
 def _message(e):
     try:
         return e.exception.message
@@ -127,9 +131,11 @@ def test_variable_httperror(app):
 
     with Dataset('http://localhost:8000/',
                  application=app) as dataset:
-        variable = dataset.variables['temperature']
-        variable._var.array.__getitem__ = mock_httperror
-        variable._var.__getitem__ = mock_httperror
+        name = 'temperature'
+        variable = dataset.variables[name]
+        dataset._pydap_dataset[name].array.__getitem__ = mock_httperror
+        dataset._pydap_dataset[name].__getitem__ = mock_httperror
+        dataset._assign_dataset = mock_function
         with pytest.raises(ServerError) as e:
             variable[...]
         assert str(_message(e)) == "'401 Test Error'"
@@ -139,9 +145,11 @@ def test_variable_httperror(app):
 
     with Dataset('http://localhost:8000/',
                  application=app) as dataset:
-        variable = dataset.variables['temperature']
-        variable._var.array.__getitem__ = mock_httperror
-        variable._var.__getitem__ = mock_httperror
+        name = 'temperature'
+        variable = dataset.variables[name]
+        dataset._pydap_dataset[name].array.__getitem__ = mock_httperror
+        dataset._pydap_dataset[name].__getitem__ = mock_httperror
+        dataset._assign_dataset = mock_function
         with pytest.raises(ServerError) as e:
             variable[...]
         assert str(_message(e)) == "'500 Test Error'"
@@ -155,9 +163,23 @@ def test_variable_sslerror(app):
 
     with Dataset('http://localhost:8000/',
                  application=app) as dataset:
-        variable = dataset.variables['temperature']
-        variable._var.array.__getitem__ = mock_sslerror
-        variable._var.__getitem__ = mock_sslerror
+        name = 'temperature'
+        variable = dataset.variables[name]
+        dataset._pydap_dataset[name].array.__getitem__ = mock_sslerror
+        dataset._pydap_dataset[name].__getitem__ = mock_sslerror
+        dataset._assign_dataset = mock_function
+        with pytest.raises(SSLError) as e:
+            variable[...]
+        assert str(_message(e)) == "('SSL Test Error',)"
+
+    with Dataset('http://localhost:8000/',
+                 application=app,
+                 verify=False) as dataset:
+        name = 'temperature'
+        variable = dataset.variables[name]
+        dataset._pydap_dataset[name].array.__getitem__ = mock_sslerror
+        dataset._pydap_dataset[name].__getitem__ = mock_sslerror
+        dataset._assign_dataset = mock_function
         with pytest.raises(ServerError) as e:
             variable[...]
         assert str(_message(e)) == "'500 Test Error'"
@@ -171,8 +193,8 @@ def test_variable_sslerror(app):
                  application=app) as dataset:
         dataset._assign_dataset = mock_assignerror
         variable = dataset.variables['temperature']
-        variable._var.array.__getitem__ = mock_sslerror
-        variable._var.__getitem__ = mock_sslerror
+        dataset._pydap_dataset[name].array.__getitem__ = mock_sslerror
+        dataset._pydap_dataset[name].__getitem__ = mock_sslerror
         with pytest.raises(SSLError) as e:
                 variable[...]
         assert str(_message(e)) == "('SSL dataset Error',)"
@@ -391,9 +413,10 @@ def test_variable_get(app):
 def test_variable_string_dtype(app):
     with Dataset('http://localhost:8000/',
                  application=app) as dataset:
-        variable = dataset.variables['station']
+        name = 'station'
+        variable = dataset.variables[name]
         assert variable.dtype != 'S40'
-        assert 'DODS' not in variable._var.attributes
-        variable._var.attributes['DODS'] = {'dimName': 'string',
-                                            'string': 40}
+        assert 'DODS' not in dataset._pydap_dataset[name].attributes
+        dataset._pydap_dataset[name].attributes['DODS'] = {'dimName': 'string',
+                                                           'string': 40}
         assert variable.dtype == 'S40'
